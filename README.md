@@ -38,8 +38,8 @@ The input is expected to be UTF-8 with BASE64 encoding
 
 ```json
 {
-    error: false,
-    result: number
+    "error": false,
+    "result": number
 }
 ```
 
@@ -47,8 +47,8 @@ The input is expected to be UTF-8 with BASE64 encoding
 
 ```json
 {
-    error: true,
-    message: string
+    "error": true,
+    "message": string
 }
 ```
 
