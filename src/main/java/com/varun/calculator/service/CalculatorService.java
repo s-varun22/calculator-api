@@ -33,8 +33,8 @@ public class CalculatorService {
 	 * @throws InvalidExpressionException
 	 * @throws InvalidSyntaxException
 	 */
-	public String calculateResult(String expression) throws InvalidExpressionException, InvalidSyntaxException {
-		return evaluateExpression(validateAndParseExpression(StringUtils.deleteWhitespace(expression))).toString();
+	public double calculateResult(String expression) throws InvalidExpressionException, InvalidSyntaxException {
+		return evaluateExpression(validateAndParseExpression(StringUtils.deleteWhitespace(expression))).getValue();
 	}
 
 	/**
