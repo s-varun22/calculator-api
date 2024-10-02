@@ -52,8 +52,3 @@ The input is expected to be UTF-8 with BASE64 encoding
 }
 ```
 
-The application instance is deployed on AWS Elastic Beanstalk
-
-**Access Point:** http://calculator-app-env.eba-yjr7ehhv.eu-central-1.elasticbeanstalk.com
-
-**Example:** http://calculator-app-env.eba-yjr7ehhv.eu-central-1.elasticbeanstalk.com/calculus?query=MiAqICgyMy8oMyozKSktIDIzICogKDIqMyk
