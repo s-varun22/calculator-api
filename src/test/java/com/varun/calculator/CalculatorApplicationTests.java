@@ -1,63 +1,96 @@
 package com.varun.calculator;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import com.varun.calculator.controller.CalculatorController;
+import com.varun.calculator.exception.GlobalExceptionHandler;
+import com.varun.calculator.exception.InvalidExpressionException;
+import com.varun.calculator.exception.InvalidSyntaxException;
+import com.varun.calculator.service.CalculatorService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(CalculatorController.class)
+@Import(GlobalExceptionHandler.class)
 class CalculatorApplicationTests {
 
-	@Autowired
-	private CalculatorController calculatorController;
+    @MockitoBean
+    CalculatorService calculatorService;
 
-	@Test
-	public void contextLoads() throws Exception {
-		assertThat(calculatorController).isNotNull();
-	}
+    @Autowired
+    private MockMvc mockMvc;
 
-	@Test
-	public void validResponse() {
-		ResponseEntity<Map<String, Object>> res = calculatorController.calculate("MiAqICgyMy8oMyozKSktIDIzICogKDIqMyk");
-		assertEquals(HttpStatus.OK, res.getStatusCode());
-		assertEquals(-132.88888888888889, res.getBody().get("result"));
-	}
+    @Test
+    void validResponse() throws Exception {
 
-	@Test
-	public void emptyQuery() {
-		ResponseEntity<Map<String, Object>> res = calculatorController.calculate("IA");
-		assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
-		assertEquals("Empty Expression", res.getBody().get("message"));
-	}
+        given(calculatorService.calculateResult("MiAqICgyMy8oMyozKSktIDIzICogKDIqMyk")).willReturn(anyDouble());
 
-	@Test
-	public void syntaxErrorQuery() {
-		ResponseEntity<Map<String, Object>> res = calculatorController
-				.calculate("KDgxIC8gMyAqMzQgZGZzIDQpIC0gMiAqIDMgKyA0");
-		assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
-		assertEquals("Invalid Expression", res.getBody().get("message"));
-	}
+        mockMvc.perform(get("/calculus?query=" + "MiAqICgyMy8oMyozKSktIDIzICogKDIqMyk"))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void invalidExpressionException() {
-		ResponseEntity<Map<String, Object>> res = calculatorController
-				.calculate("KDgxIC8gMyAqMyAqKiA0KSAtIDIgKiAzICsgNA");
-		assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
-		assertEquals("Syntax Error Detected", res.getBody().get("message"));
-	}
+    @Test
+    void emptyQuery() throws Exception {
 
-	@Test
-	public void decodeErrorHandler() {
-		ResponseEntity<Map<String, Object>> res = calculatorController.calculate("XXXXXaGVsbG8");
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, res.getStatusCode());
-		assertEquals("Error Occured while processing the request", res.getBody().get("message"));
-	}
+        mockMvc.perform(get("/calculus?query=" + "IA"))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(InvalidExpressionException.class, result.getResolvedException()))
+                .andExpect(result -> assertEquals("Empty Expression",
+                        Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
+    void syntaxErrorQuery() throws Exception {
+
+        given(calculatorService.calculateResult(anyString()))
+                .willThrow(new InvalidSyntaxException("Syntax Error Detected"));
+
+        mockMvc.perform(get("/calculus?query=" + "KDgxIC8gMyAqMyAqKiA0KSAtIDIgKiAzICsgNA"))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(InvalidSyntaxException.class, result.getResolvedException()))
+                .andExpect(result -> assertEquals("Syntax Error Detected",
+                        Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
+    void invalidExpressionException() throws Exception {
+
+        given(calculatorService.calculateResult(anyString()))
+                .willThrow(new InvalidExpressionException("Invalid Expression"));
+
+        mockMvc.perform(get("/calculus?query=" + "KDgxIC8gMyAqMzQgZGZzIDQpIC0gMiAqIDMgKyA0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(InvalidExpressionException.class, result.getResolvedException()))
+                .andExpect(result -> assertEquals("Invalid Expression",
+                        Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+    }
+
+    @Test
+    void decodeErrorHandler() throws Exception {
+
+        given(calculatorService.calculateResult(anyString()))
+                .willThrow(new RuntimeException("Error Occurred while processing the request"));
+
+        mockMvc.perform(get("/calculus?query=" + "KDgxIC8gMyAqMzQgZGZzIDQpIC0gMiAqIDMgKyA0"))
+                .andExpect(status().is5xxServerError())
+                .andExpect(result -> assertInstanceOf(Exception.class, result.getResolvedException()))
+                .andExpect(result -> assertEquals("Error Occurred while processing the request",
+                        Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
 }

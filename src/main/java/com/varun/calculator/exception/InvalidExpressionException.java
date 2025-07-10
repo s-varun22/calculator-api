@@ -2,10 +2,10 @@ package com.varun.calculator.exception;
 
 /**
  * @author Varun Srivastava
- *
  */
-public class InvalidExpressionException extends Exception {
+public class InvalidExpressionException extends RuntimeException {
 
-	private static final long serialVersionUID = 8753565776076555274L;
-
+    public InvalidExpressionException(String message) {
+        super(message);
+    }
 }

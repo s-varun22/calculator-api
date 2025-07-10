@@ -4,7 +4,7 @@ A simple web service to implement a calculator. The service offers an endpoint t
 
 **Contrains:**
 
-The service only evaluates mathematical expressions containing below contrains
+The service only evaluates mathematical expressions containing below constraints
 
 - Addition **+**
 - Substraction **-**
@@ -18,7 +18,7 @@ The service only evaluates mathematical expressions containing below contrains
 
 ### **Run the Application**
 
-1. Navigate to the project foler and
+1. Navigate to the project folder and
 2. Open the terminal
 3. Run the below command
 
@@ -38,8 +38,7 @@ The input is expected to be UTF-8 with BASE64 encoding
 
 ```json
 {
-    "error": false,
-    "result": number
+    "result": "number"
 }
 ```
 
@@ -47,7 +46,6 @@ The input is expected to be UTF-8 with BASE64 encoding
 
 ```json
 {
-    "error": true,
-    "message": string
+    "failureReason": "string"
 }
 ```
