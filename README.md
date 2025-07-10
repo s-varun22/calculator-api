@@ -51,7 +51,3 @@ The input is expected to be UTF-8 with BASE64 encoding
     "message": string
 }
 ```
-
-The application instance is deployed on AWS Elastic Beanstalk
-
-**Example:** http://localhost:8000/calculus?query=MiAqICgyMy8oMyozKSktIDIzICogKDIqMyk
