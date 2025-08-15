@@ -1,1 +1,1 @@
-java -jar target/calculator-0.0.1-SNAPSHOT.jar
+java -jar target/calculator-1.0.jar

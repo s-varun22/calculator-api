@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -26,16 +27,20 @@ public class CalculatorController {
 
     @GetMapping("/calculus")
     public ResponseEntity<ResponseDto> calculate(@RequestParam(value = "query") String query) {
+        final String expression;
+        try {
+            byte[] bytes = Base64.getDecoder().decode(query);
+            expression = new String(bytes, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidExpressionException("Query must be Base64-encoded UTF-8 text");
+        }
 
-        String expression = new String(Base64.getDecoder().decode(query));
-
-        if (StringUtils.isNotBlank(expression)) {
-            // check if the string is just white spaces
-            double result = calculatorService.calculateResult(expression);
-            return new ResponseEntity<>(ResponseDto.builder().result(result).build(), HttpStatus.OK);
-        } else {
+        if (StringUtils.isBlank(expression)) {
             throw new InvalidExpressionException("Empty Expression");
         }
+
+        double result = calculatorService.calculateResult(expression);
+        return new ResponseEntity<>(new ResponseDto(result), HttpStatus.OK);
     }
 
 }

@@ -9,28 +9,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InvalidExpressionException.class)
+    @ExceptionHandler({InvalidExpressionException.class, InvalidSyntaxException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorDto> handleException(InvalidExpressionException ex) {
-        return new ResponseEntity<>(ErrorDto.builder()
-                .failureReason(ex.getMessage())
-                .build(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InvalidSyntaxException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorDto> handleException(InvalidSyntaxException ex) {
-        return new ResponseEntity<>(ErrorDto.builder()
-                .failureReason(ex.getMessage())
-                .build(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorDto> handleException(RuntimeException ex) {
+        return new ResponseEntity<>(new ErrorDto(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorDto> handleGenericException(Exception e) {
-        e.printStackTrace();
-        return new ResponseEntity<>(ErrorDto.builder()
-                .failureReason("Error Occurred while processing the request")
-                .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(new ErrorDto("Error Occurred while processing the request"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

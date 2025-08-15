@@ -1,32 +1,39 @@
-# **calculator-api**
+# Calculator API
 
-A simple web service to implement a calculator. The service offers an endpoint that reads a string input and returns the result.
+A RESTful web service for evaluating mathematical expressions.
 
-**Contrains:**
+This API parses expressions (supporting addition, subtraction, multiplication, division, parentheses, decimals, and
+negative numbers) and returns the computed result in JSON format.
 
-The service only evaluates mathematical expressions containing below constraints
+**Constraints:**
 
-- Addition **+**
-- Substraction **-**
-- Multiplication **\***
-- Division **/**
-- Parenthesis **()**
+The service evaluates mathematical expressions containing only the following operators:
+
+- Addition (`+`)
+- Subtraction (`-`)
+- Multiplication (`*`)
+- Division (`/`)
+- Parentheses (`()`)
+
+Numbers can be integers or decimals, and negative numbers are supported.
+Implicit multiplication using parentheses is also allowed.
+
+Unary plus (`+`) and unary minus (`-`) operators are supported, including multiple consecutive unary operators, which
+are resolved according to standard arithmetic rules.
 
 ### **Compile the Application**
 
-    mvn clean install -DskipTests
+    mvn clean install
 
 ### **Run the Application**
 
-1. Navigate to the project folder and
+1. Navigate to the project folder
 2. Open the terminal
 3. Run the below command
 
    ```sh
-   java -jar target/calculator-0.0.1-SNAPSHOT.jar
+   java -jar target/calculator-1.0.jar
    ```
-
-The application can also be started locally using the script start.sh present in the project folder.
 
 ### **API Description**
 
@@ -34,11 +41,19 @@ The application can also be started locally using the script start.sh present in
 
 The input is expected to be UTF-8 with BASE64 encoding
 
+For example, the expression `2 + 3` should be encoded to `MiArIDM=` in Base64.
+
+**Sample Request:**
+
+```sh
+curl "http://localhost:8080/calculus?query=MiArIDM="
+```
+
 **On Success Response:**
 
 ```json
 {
-    "result": "number"
+  "result": 5.0
 }
 ```
 
@@ -46,6 +61,6 @@ The input is expected to be UTF-8 with BASE64 encoding
 
 ```json
 {
-    "failureReason": "string"
+  "failureReason": "string"
 }
 ```

@@ -1,17 +1,18 @@
 package com.varun.calculator.token;
 
-import lombok.Getter;
-
 /**
  * @author Varun Srivastava
  */
-@Getter
 public final class Parenthesis implements Token {
 
     private final boolean open;
 
     private Parenthesis(boolean open) {
         this.open = open;
+    }
+
+    public boolean isOpen() {
+        return open;
     }
 
     public static Parenthesis parseParenthesis(String s) {

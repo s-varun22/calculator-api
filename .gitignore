@@ -39,7 +39,7 @@ local.properties
 # Annotation Processing
 .apt_generated/
 .apt_generated_test/
-
+.DS_Store
 
 ### Eclipse Patch ###
 # Spring Boot Tooling

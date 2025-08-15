@@ -5,6 +5,7 @@ import com.varun.calculator.exception.InvalidSyntaxException;
 import com.varun.calculator.service.CalculatorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +26,7 @@ class CalculatorServiceTests {
 
     @Test
     void queryWithWhiteSpaces() {
-        assertEquals(82.0, calculatorService.calculateResult("(81 / 3 * 4) - 2 + 8 * 3"));
+        assertEquals(130.0, calculatorService.calculateResult("(81 / 3 * 4) - 2 + 8 * 3"));
     }
 
     @Test
@@ -43,12 +44,86 @@ class CalculatorServiceTests {
 
     @Test
     void queryWithNegation() {
-        assertEquals(108.0, calculatorService.calculateResult("(81 / 3 * 4) - -(2 * 3) + 5"));
+        assertEquals(119.0, calculatorService.calculateResult("(81 / 3 * 4) - -(2 * 3) + 5"));
+    }
+
+    @Test
+    void decimalNumbers() {
+        assertEquals(7.0, calculatorService.calculateResult("3.5*2"));
+        assertEquals(2.0, calculatorService.calculateResult("12/(2*(2+1))"));
+    }
+
+    @Test
+    void doubleUnaryMinusAtStart() {
+        assertEquals(5.0, calculatorService.calculateResult("--5"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "--5, 5.0",
+            "----5, 5.0",
+            "-+-+5, 5.0",
+            "+-+5, -5.0"
+    })
+    void chainedUnaryAtStart(String expr, double expected) {
+        assertEquals(expected, calculatorService.calculateResult(expr));
+    }
+
+    @Test
+    void unaryInsideExpression() {
+        assertEquals(15.0, calculatorService.calculateResult("3*--5"));
+        assertEquals(-2.0, calculatorService.calculateResult("10/+-5"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "--(2+3), 5.0",
+            "+-(2+3), -5.0"
+    })
+    void chainedUnaryBeforeParentheses(String expr, double expected) {
+        assertEquals(expected, calculatorService.calculateResult(expr));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"-", "--", "+)", "-*"})
+    void invalidUnaryWithoutOperand(String expr) {
+        assertThrows(InvalidSyntaxException.class, () -> calculatorService.calculateResult(expr));
+    }
+
+    @Test
+    void unaryWithDecimals() {
+        assertEquals(-0.3, calculatorService.calculateResult("-0.5+0.2"), 1e-9);
+    }
+
+    @Test
+    void doubleUnaryPlusAtStart() {
+        assertEquals(5.0, calculatorService.calculateResult("++5"));
+    }
+
+    @Test
+    void unaryMinusOnParentheses() {
+        assertEquals(-5.0, calculatorService.calculateResult("-(2+3)"));
+    }
+
+    @Test
+    void chainedImplicitMultiplication() {
+        assertEquals(24.0, calculatorService.calculateResult("2(3)(4)"));
+        assertEquals(33.0, calculatorService.calculateResult("(1+2)3+4(5+1)"));
+    }
+
+    @Test
+    void operatorAtEndThrows() {
+        assertThrows(RuntimeException.class, () -> calculatorService.calculateResult("2+"));
+    }
+
+    @Test
+    void spacesOnlyExpressionThrows() {
+        assertThrows(InvalidExpressionException.class, () -> calculatorService.calculateResult("   "));
     }
 
     @Test
     void multiplyWithParenthesis() {
-        assertEquals(97.0, calculatorService.calculateResult("(81 / 3)(4) - (2 * 3) + 5"));
+        assertEquals(107.0, calculatorService.calculateResult("(81 / 3)(4) - (2 * 3) + 5"));
     }
 
     @ParameterizedTest

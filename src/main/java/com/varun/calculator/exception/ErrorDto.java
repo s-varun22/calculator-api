@@ -1,11 +1,5 @@
 package com.varun.calculator.exception;
 
-import lombok.Builder;
-import lombok.Value;
+public record ErrorDto(String failureReason) {
 
-@Value
-@Builder
-public class ErrorDto {
-
-    String failureReason;
 }

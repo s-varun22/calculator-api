@@ -14,7 +14,7 @@ public final class Subtraction extends Operation {
 
     @Override
     public int getPrecedence() {
-        return 4;
+        return 3;
     }
 
     @Override
